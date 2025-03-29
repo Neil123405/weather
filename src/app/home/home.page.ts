@@ -27,16 +27,30 @@ export class HomePage implements OnInit {
 
   async ngOnInit() {
     await this.loadSettings();
+    await this.loadNotificationPreference(); // Load notification preference on startup
     this.checkInternetAndFetchWeather();
   }
 
   constructor(private weatherService: WeatherService, private configService: ConfigService) {}
 
-  toggleNotifications() {
-    this.configService.updateNotificationPreference(this.notificationsEnabled)
-      .then(() => console.log('Notification preference updated'))
-      .catch(err => console.error('Error updating preference:', err));
+ // ✅ Toggle notifications and save preference
+async toggleNotifications(event: any) {
+  this.notificationsEnabled = event.detail.checked;
+
+  try {
+    await this.configService.updateNotificationPreference(this.notificationsEnabled);
+    console.log('Notification preference updated');
+
+    // Save to local storage
+    await Preferences.set({
+      key: 'notificationsEnabled',
+      value: JSON.stringify(this.notificationsEnabled),
+    });
+
+  } catch (err) {
+    console.error('Error updating preference:', err);
   }
+}
 
   async loadSettings() {
     const settings = await Preferences.get({ key: 'settings' });
@@ -46,8 +60,15 @@ export class HomePage implements OnInit {
       this.isDarkMode = parsedSettings.isDarkMode ?? false; 
       this.applyDarkMode();
     }
+
+    await this.loadNotificationPreference();
   }
   
+  async loadNotificationPreference() {
+    const storedPreference = await Preferences.get({ key: 'notificationsEnabled' });
+    this.notificationsEnabled = storedPreference.value ? JSON.parse(storedPreference.value) : true; // Default to true
+  }
+
   applyDarkMode() {
     if (this.isDarkMode) {
       document.body.classList.add('dark-theme');

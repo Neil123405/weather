@@ -2,7 +2,7 @@
   <ion-toolbar color="primary">
     <ion-item>
       <ion-label>Enable Notifications</ion-label>
-      <ion-toggle [(ngModel)]="notificationsEnabled" (ionChange)="toggleNotifications()"></ion-toggle>
+      <ion-toggle [(ngModel)]="notificationsEnabled" (ionChange)="toggleNotifications($event)"></ion-toggle>
     </ion-item>
     
     <ion-buttons slot="end">
